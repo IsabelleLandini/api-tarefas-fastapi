@@ -26,12 +26,17 @@ from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
 # Vem do .env
 DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise Exception("DATABASE_URL não definida no .env")
 
 # Criação da engine (conexão com o banco)
-engine = create_engine(
-    DATABASE_URL, 
-    connect_args={'check_same_thread':False}
-)
+if "sqlite" in DATABASE_URL:
+    engine = create_engine(
+        DATABASE_URL, 
+        connect_args={'check_same_thread':False}
+    )
+else:
+    engine = create_engine(DATABASE_URL)
 
 # Sessão do banco
 SessionLocal = sessionmaker(
@@ -59,6 +64,8 @@ app = FastAPI(
 
 MEU_USUARIO = os.getenv("MEU_USUARIO")
 MINHA_SENHA = os.getenv("MINHA_SENHA")
+if not MEU_USUARIO or not MINHA_SENHA:
+    raise Exception("Credenciais não configuradas no .env")
 
 security = HTTPBasic()
 
@@ -110,6 +117,12 @@ class TarefaRead(BaseModel):
     class Config:
         from_attributes = True # Permite que o Pydantic leia objetos do SQLAlchemy
 
+class TarefaPaginada(BaseModel):
+    page: int
+    limit: int
+    total: int
+    tarefas: List[TarefaRead]
+
 # Cria as tabelas automaticamente   
 Base.metadata.create_all(bind=engine)
 
@@ -135,7 +148,7 @@ def home():
     return {"message": "API de tarefas rodando!"}
 
 
-@app.get("/tarefas")
+@app.get("/tarefas", response_model=TarefaPaginada)
 def get_tarefas(
     page: int = 1, 
     limit: int = 10, 
@@ -148,31 +161,21 @@ def get_tarefas(
     if page < 1 or limit < 1:
        raise HTTPException(
            status_code=400, 
-           detail= 'Page e Limit estão com valores invalidos.'
+           detail= 'Page e Limit estão com valores inválidos.'
         )
     
     tarefas = db.query(TarefaDB).offset((page-1) * limit).limit(limit).all()
-
-    if not tarefas:
-        return {"message": "Não existe nenhuma tarefa!"}
-    
     total_tarefas = db.query(TarefaDB).count()
 
     return {
             'page': page,
             'limit': limit,
             'total': total_tarefas,
-            'tarefas': [{'id': tarefa.id, 
-                        'nome_tarefa': tarefa.nome_tarefa, 
-                        'descricao': tarefa.descricao, 
-                        'concluida': tarefa.concluida
-                        } 
-                        for tarefa in tarefas
-                        ]
-            }
+            'tarefas': tarefas,
+    } 
 
 
-@app.post("/adiciona")
+@app.post("/tarefas", response_model=TarefaRead)
 def post_tarefas(
     tarefa: Tarefa, 
     db: Session = Depends(sessao_db),
@@ -202,10 +205,10 @@ def post_tarefas(
     db.commit()
     db.refresh(nova_tarefa)
     
-    return {"message": "Tarefa adicionada com sucesso!"}
+    return nova_tarefa
 
 
-@app.put("/atualiza/{id_tarefa}")
+@app.put("/tarefas/{id_tarefa}", response_model=TarefaRead)
 def put_tarefas (
     id_tarefa: int, 
     tarefa: Tarefa, 
@@ -229,10 +232,10 @@ def put_tarefas (
     db.commit()
     db.refresh(db_tarefa)
 
-    return {"message": "Tarefa atualizada com sucesso!"}
+    return db_tarefa
 
  
-@app.delete("/deletar/{id_tarefa}")
+@app.delete("/tarefas/{id_tarefa}")
 def delete_tarefa(
     id_tarefa: int, 
     db: Session = Depends(sessao_db),
@@ -246,7 +249,7 @@ def delete_tarefa(
     if not db_tarefa:
         raise HTTPException(
             status_code=404, 
-            detail= "Essa tarefa não foi encontrada."
+            detail= "Tarefa não foi encontrada."
         )
     
     db.delete(db_tarefa)
