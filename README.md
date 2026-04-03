@@ -1,6 +1,6 @@
 # 📋 API de Tarefas
 
-API REST para gerenciamento de tarefas, desenvolvida com FastAPI, autenticação básica e persistência em SQLite. O projeto é executado dentro de um contêiner Docker/ Podman, garantindo um ambiente consistente e replicável.
+API REST para gerenciamento de tarefas, desenvolvida com FastAPI, autenticação básica e persistência em SQLite. O projeto é executado dentro de um contêiner Docker/Podman, garantindo um ambiente consistente e replicável.
 
 ---
 
@@ -62,7 +62,7 @@ MINHA_SENHA=1234
 ### Clonar o repositório
 
 ```
-git clone git clone https://github.com/IsabelleLandini/api-tarefas-fastapi.git
+git clone https://github.com/IsabelleLandini/api-tarefas-fastapi.git
 cd api-tarefas-fastapi
 ```
 
