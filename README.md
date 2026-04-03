@@ -1,6 +1,6 @@
 # 📋 API de Tarefas
 
-API para gerenciamento de tarefas, construída com FastAPI, com autenticação básica e banco de dados SQLite. O projeto é executado dentro de um contêiner Docker, garantindo um ambiente consistente e replicável.
+API REST para gerenciamento de tarefas, desenvolvida com FastAPI, autenticação básica e persistência em SQLite. O projeto é executado dentro de um contêiner Docker/ Podman, garantindo um ambiente consistente e replicável.
 
 ---
 
@@ -50,7 +50,7 @@ Este projeto foi desenvolvido com o objetivo de praticar:
 Crie um arquivo `.env` na raiz do projeto:
 
 ```
-DATABASE_URL=sqlite:///./tarefas.db
+DATABASE_URL=sqlite:///./data/tarefas.db
 MEU_USUARIO=admin
 MINHA_SENHA=1234
 ```
@@ -62,7 +62,7 @@ MINHA_SENHA=1234
 ### Clonar o repositório
 
 ```
-git clone https://github.com/seu-usuario/api-tarefas-fastapi.git
+git clone git clone https://github.com/IsabelleLandini/api-tarefas-fastapi.git
 cd api-tarefas-fastapi
 ```
 
@@ -108,7 +108,7 @@ password: 1234
 
 ### Criar tarefa
 
-`POST /adiciona`
+`POST /tarefas`
 
 ```
 {
@@ -128,7 +128,7 @@ password: 1234
 
 ### Atualizar tarefa
 
-`PUT /atualiza/{id}`
+`PUT /tarefas/{id}`
 
 ```
 {
@@ -142,7 +142,7 @@ password: 1234
 
 ### Deletar tarefa
 
-`DELETE /deletar/{id}`
+`DELETE /tarefas/{id}`
 
 ---
 
